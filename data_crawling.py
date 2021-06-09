@@ -12,7 +12,7 @@ pubs = {
             'cs.ai': ['nips','ieee','eccv','cvpr','iccv','aaai','icml','iclr','iswc','neurlps','elsevier'],
             'cs.db': ['sigir','sigmod','WWW','acm','ieee','icde','wsdm','cikm','icwsm'],
             'cs.os': ['ieee', 'acm', 'asplos', 'usenix', 'fast', 'eurosys', 'osdi', 'sosp', 'jss', 'tecs' ],
-            'cs.dc': ['acm','icdcs','hpdc', 'ieee', 'ppopp','ndss', 'tpds', 'jpdc', 'socc', 'dc']
+            'cs.dc': ['acm','icdcs','hpdc', 'ieee', 'ppopp','ndss', 'tpds', 'jpdc', 'socc', 'dc'],
             'cs.ni': ['globecom','ieee','icc','infocom','sigcomm','sigmetrics','acm','elsevier'],
             'cs.cv': ['bmvc','cvpr','eccv','iccv','scia','ssiai','ieee','acmmm','iros','elsevier','springer'],
             'cs.pl': ['ecoop','esop','acm','sigplan','icfp','iclp','oopsla','popl','pldi','elsevier'],

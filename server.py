@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,make_response
 import json
 from paper_summarization import main
 from data_crawling import get_top_10_papers,get_files,get_random_papers
@@ -17,7 +17,7 @@ POST data (json)
 }
 '''
 
-interest = ''
+interest = 'UNK'
 
 @app.route('/interest', methods=['POST'])
 def postInterest():
@@ -82,14 +82,14 @@ def send_summary(fields):
         for k in list(summary_data.keys()):
             if count == 3:
                 break
-            if fields[0] != '':
-                if len(set(summary_data[k][tags]) & set(fields)) == 0:
+            if fields[0] != '' and fields[0] != 'UNK':
+                if len(set(summary_data[k]['tags']) & set(fields)) == 0:
                     continue
             f.write(k+'\n')
             data = summary_data[k]
             ccount = str(count)
             paper['title' + ccount] = data['title']
-            paper['author' + ccount] = ','.join(data['author'])
+            paper['author' + ccount] = ','.join(data['authors'])
             paper['publication' + ccount] = data['publication']
             paper['year' + ccount] = data['year']
             paper['summary' + ccount] = data['summary']
@@ -119,9 +119,7 @@ def getPaper():
 
     if os.path.exists('./summary_data_ready.json'):
         paper = send_summary(fields)
-        paper = json.dumps(paper)
-        print(paper)
-
+        
     else:
         print('here!')
         for i in range(3):
@@ -132,12 +130,13 @@ def getPaper():
             paper['summary'+str(i)] = ''
             paper['pdf'+str(i)] = ''
 
-    thread = Thread(target=summarization_caching,args=(fields,))
-    thread.daemon = True
-    thread.start()
-    paper = json.dumps(paper)
+    if interest != 'UNK':
+        thread = Thread(target=summarization_caching,args=(fields,))
+        thread.daemon = True
+        thread.start()
+    response = make_response(json.dumps(paper,ensure_ascii=False).encode('utf-8'))
     print(paper)
-    return jsonify(paper)
+    return response
 
 if __name__ == "__main__":
     app.run(debug=True, host="163.239.28.25", port=5000)
