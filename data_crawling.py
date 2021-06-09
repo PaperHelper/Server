@@ -11,12 +11,12 @@ import tqdm
 pubs = {
             'cs.ai': ['nips','ieee','eccv','cvpr','iccv','aaai','icml','iclr','iswc','neurlps','elsevier'],
             'cs.db': ['sigir','sigmod','WWW','acm','ieee','icde','wsdm','cikm','icwsm'],
-            'cs.os': ['atc','usenix','acm','middleware','sosp','systor','osdi','eurosys','hotos','apsys','sac','ieee','springer'],
-            'cs.dc': ['acm','disc','dsn','ieee','debs','icdcs','icpads','ipdps','podc','ppopp','sirocco','spaa','srds','hipc','sc','elsevier'],
+            'cs.os': ['ieee', 'acm', 'asplos', 'usenix', 'fast', 'eurosys', 'osdi', 'sosp', 'jss', 'tecs' ],
+            'cs.dc': ['acm','icdcs','hpdc', 'ieee', 'ppopp','ndss', 'tpds', 'jpdc', 'socc', 'dc']
             'cs.ni': ['globecom','ieee','icc','infocom','sigcomm','sigmetrics','acm','elsevier'],
             'cs.cv': ['bmvc','cvpr','eccv','iccv','scia','ssiai','ieee','acmmm','iros','elsevier','springer'],
             'cs.pl': ['ecoop','esop','acm','sigplan','icfp','iclp','oopsla','popl','pldi','elsevier'],
-            'cs.ds': ['esa','soda','acm','siam','swat','wads','waoa','ccc','fct','focs','ieee','icalp','isaac','mfcs','stacs','stoc','wollic'],
+            'cs.ds': ['stoc','focs','soda','spaa','wads','esa','swat','acm','ieee','isaac'],
             'cs.cl': ['acl','emnlp','naacl','tacl','SemEval','coling','eacl','conll','lrec','sigdial'],
             'cs': ['acm','ieee','iclr','nips','icml','acs']
         }
