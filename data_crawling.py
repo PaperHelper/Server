@@ -132,9 +132,15 @@ def check_served(mapper):
 def get_files(papers):
     if not os.path.exists('./data/'):
         os.mkdir('./data/')
+
+    existing_files = os.listdir('./data/')
+
     for p in papers:
-        download(f'https://arxiv.org/pdf/{p}.pdf',f'./data/{p}.pdf')
-        print(f'{p}.pdf download completed.')
+        filename = p+'.pdf'
+        if filename in existing_files:
+            continue
+        download(f'https://arxiv.org/pdf/{filename}',f'./data/{filename}')
+        print(f'{filename} download completed.')
 
 if __name__ == '__main__':
     papers = get_top_10_papers(['cs.ro','cs.cl'])
