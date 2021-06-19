@@ -22,6 +22,8 @@ pubs = {
             'cs': ['acm','ieee','iclr','nips','icml','acs','nerips','cvpr','iccv','eccv','aaai']
         }
 
+field_list = []
+
 def download(url, file_name):
     with open(file_name, "wb") as file:   # open in binary mode
         response = get(url)               # get request
@@ -31,6 +33,9 @@ def get_random_papers():
     return get_top_10_papers(['cs'])
 
 def get_top_10_papers(fields):
+
+    global field_list
+    field_list = fields
     
     def get_papers(fields,size):
         URL = f"https://arxiv.org/search/advanced"
@@ -140,8 +145,11 @@ def get_files(papers):
     with open('./mapper.json','r') as f:
         mapper = json.load(f) 
 
+    cnt = 0
+
     for f in os.listdir('./data/'):
         if os.path.getsize(f'./data/{f}') == 0:
+            cnt+=1
             os.remove(f'./data/{f}')
             print(f'removed {f}.')
             if f[:-4] in mapper.keys():
@@ -149,6 +157,10 @@ def get_files(papers):
 
     with open('./mapper.json','w') as f:
         json.dump(mapper,f)
+
+    if cnt > 0:
+        more_papers = get_top_10_papers(field_list)
+        get_files(more_papers)
 
 if __name__ == '__main__':
     papers = get_top_10_papers(['cs.ro','cs.cl'])
