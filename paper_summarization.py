@@ -32,11 +32,6 @@ from tqdm import tqdm
 import json
 import os
 
-logger = logging.getLogger("PaperSummary")
-logger.setLevel(logging.INFO)
-stream_handler = logging.StreamHandler()
-logger.addHandler(stream_handler)
-
 
 # %load_ext google.colab.data_table
 
@@ -48,7 +43,6 @@ def pdf_to_text(filename):
       rsrcmgr = PDFResourceManager()
       device = TextConverter(rsrcmgr, output_string, laparams=LAParams())
       interpreter = PDFPageInterpreter(rsrcmgr, device)
-      logger.info("Converting pdf to text ...")
       for page in PDFPage.create_pages(doc):
           interpreter.process_page(page)
   return output_string.getvalue()
@@ -62,25 +56,30 @@ def preprocess_text(filename):
     text = text.partition('Introduction')[2]
   elif 'INTRODUCTION' in text:
     text = text.partition('INTRODUCTION')[2]
+  else:
+    print("Introduction not in paper!")
   if 'Acknowledgements' in text:
     text = text.partition('Acknowledgements')[0].strip()
   elif 'ACKNOWLEDGEMENTS' in text:
     text = text.partition('ACKNOWLEDGEMENTS')[0].strip()
+  else:
+      print("Acknowledgements not in paper!")
   if 'References' in text:
     text = text.partition('References')[0].strip()
   elif 'REFERENCES' in text:
     text = text.partition('REFERENCES')[0].strip()
+  else:
+    print("References not in paper or there was Acknowledgements section!")
   # print(text)
-  text = re.sub('ﬀ','ff',text)
-  text = re.sub('[(].+[)]','',text)
+  text = re.sub(chr(64256),'ff',text)
+  text = re.sub('\(.+\)','',text)
   text = re.sub('\[[^a-zA-Z]+\]','',text)
   text = re.sub('-\n','',text)
   text = re.sub('\n',' ',text)
   text = re.sub('\d+\.\s','',text)
-  paragraphs = re.split('\s{2,}',text)
-  """for p in paragraphs:
-    print(p+'\n')"""
-  logger.info("Splitting paragraphs ...")
+  paragraphs = re.split('\s{3,}',text)
+  for p in paragraphs:
+    print(p+'\n')
   new_paragraphs = [p for p in tqdm(paragraphs) if re.search('[a-z]+',p,re.I)]
 
   paragraphs = []
@@ -142,6 +141,11 @@ def generate_summarization(modified_paragraphs,summarizer):
   return summarization
 
 def main(papers):
+  logger = logging.getLogger("PaperSummary")
+  logger.setLevel(logging.INFO)
+  stream_handler = logging.StreamHandler()
+  logger.addHandler(stream_handler)
+
   files = [f'./data/{p}.pdf' for p in papers]
   
   logger.info("Initializing Summarizer & Tokenizer ...")
@@ -156,9 +160,11 @@ def main(papers):
   summary_data = dict()
   if os.path.exists('./summary_data_ready.json'):
     with open('./summary_data_ready.json') as f:
-        summary_data = json.load(f)
+      summary_data = json.load(f)
 
   for i,f in enumerate(files):
+    print(f"Processing #{i+1} paper ({f})")
+
     logger.info("Preprocessing Paper ...")
     paragraphs,original_text_length = preprocess_text(f)
     # print(paragraphs)
@@ -183,7 +189,6 @@ def main(papers):
 
 if __name__ == '__main__':
     
-    files = [f for f in os.listdir('./data/') if f.endswith('.pdf')]
+  files = [f[:-4] for f in os.listdir('./data/') if f.endswith('.pdf')]
     
-    for f in files:
-        main(f)
+  main(files[:1]) 
