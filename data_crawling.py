@@ -9,13 +9,13 @@ import json
 import tqdm
 
 pubs = {
-            'cs.ai': ['nips','ieee','eccv','cvpr','iccv','aaai','icml','iclr','iswc','neurlps','elsevier'],
+            'cs.ai': ['nips','ieee','eccv','cvpr','iccv','aaai','icml','iclr','iswc','neurlps'],
             'cs.db': ['sigir','sigmod','WWW','acm','ieee','icde','wsdm','cikm','icwsm'],
             'cs.os': ['ieee', 'acm', 'asplos', 'usenix', 'fast', 'eurosys', 'osdi', 'sosp', 'jss', 'tecs' ],
             'cs.dc': ['acm','icdcs','hpdc', 'ieee', 'ppopp','ndss', 'tpds', 'jpdc', 'socc', 'dc'],
-            'cs.ni': ['globecom','ieee','icc','infocom','sigcomm','sigmetrics','acm','elsevier'],
-            'cs.cv': ['bmvc','cvpr','eccv','iccv','scia','ssiai','ieee','acmmm','iros','elsevier','springer'],
-            'cs.pl': ['ecoop','esop','acm','sigplan','icfp','iclp','oopsla','popl','pldi','elsevier'],
+            'cs.ni': ['globecom','ieee','icc','infocom','sigcomm','sigmetrics','acm'],
+            'cs.cv': ['bmvc','cvpr','eccv','iccv','scia','ssiai','ieee','acmmm','iros'],
+            'cs.pl': ['ecoop','esop','acm','sigplan','icfp','iclp','oopsla','popl','pldi'],
             'cs.ds': ['stoc','focs','soda','spaa','wads','esa','swat','acm','ieee','isaac'],
             'cs.cl': ['acl','emnlp','naacl','tacl','SemEval','coling','eacl','conll','lrec','sigdial'],
             'cs': ['acm','ieee','iclr','nips','icml','acs']
@@ -66,17 +66,22 @@ def get_top_10_papers(fields):
         titles = [t.text.strip() for t in soup.find_all(attrs={'class':'title is-5 mathjax'})]
         authors = [[author.text.strip() for author in a.find_all(name='a')] for a in soup.find_all(attrs={'class':'authors'})]
         comments = soup.find_all(attrs={'class':'has-text-grey-dark mathjax'})
-        tags = [t.text.strip().split('\n') for t in soup.find_all(attrs={'class':'tags is-inline-block'})]
+        tags = [t.text.lower().strip().split('\n') for t in soup.find_all(attrs={'class':'tags is-inline-block'})]
+        keywords = [t.text.strip() for t in soup.find_all(attrs={'class':'search-hit mathjax'})]
 
         mapper = dict()
+        print(list(pubs.keys()))
+        print(tags[0])
+        print([t for t in tags[0] if t in list(pubs.keys())])
 
         for i in range(size):
             mapper[codes[i]] = {
                     'title':titles[i],
                     'authors':authors[i],
-                    'publication':comments[i].text.strip(),
+                    'comments':comments[i].text.strip(),
                     'year':'20'+codes[i][:2],
-                    'tags':tags[i],
+                    'tags':[t for t in tags[i] if t in list(pubs.keys())],
+                    'publication':keywords[i],
                     'pdf':'https://arxiv.org/pdf/'+codes[i]+'.pdf'
                     }
 

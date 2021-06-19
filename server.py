@@ -8,32 +8,24 @@ from threading import Thread
 #from flask_restx import Api, Resource
 
 app = Flask(__name__)
-#api = Api(app)
-
-'''
-POST data (json)
-{
-    'interest': 'cs.ai\tcs.cr'
-}
-'''
 
 interest = 'UNK'
+
+cs = {"Artificial Intelligence":"cs.ai", 
+        "Database":"cs.db", 
+        "Operating Systems":"cs.os", 
+        "Distributed, Parallel, and Cluster Computing":"cs.dc", 
+        "Networking and Internet Architecture":"cs.ni", 
+        "Computer Vision and Pattern Recognition":"cs.cv", 
+        "Robotics":"cs.ro",
+        "Programming Languages":"cs.pl",
+        "Data Structures and Algorithms":"cs.ds",
+        "Computation and Language":"cs.cl"
+    }
 
 @app.route('/interest', methods=['POST'])
 def postInterest():
     global interest
-
-    cs = {"Artificial Intelligence":"cs.ai", 
-            "Database":"cs.db", 
-            "Operating Systems":"cs.os", 
-            "Distributed, Parallel, and Cluster Computing":"cs.dc", 
-            "Networking and Internet Architecture":"cs.ni", 
-            "Computer Vision and Pattern Recognition":"cs.cv", 
-            "Robotics":"cs.ro",
-            "Programming Languages":"cs.pl",
-            "Data Structures and Algorithms":"cs.ds",
-            "Computation and Language":"cs.cl"
-            }
 
     data = request.get_json(silent=True, cache=False, force=True)
     print("Received data:", data)
@@ -45,30 +37,17 @@ def postInterest():
     print("Interests:", interest)
     return jsonify(interest)
 
+def generate_tags(tags, publication):
+    tag = ""
+    list_of_values = list(cs.values())
+    list_of_keys = list(cs.keys())
 
-'''
-GET data (json)
-{
-    "title0": "title0",
-    "author0": "author0",
-    "publication0": "publication0",
-    "year0": "year0",
-    "summary0": "summary0",
-    "pdf0": "pdf0"
-    "title1": "title1",
-    "author1": "author1",
-    "publication1": "publication1",
-    "year1": "year1",
-    "summary1": "summary1",
-    "pdf1": "pdf1"
-    "title2": "title2",
-    "author2": "author2",
-    "publication2": "publication2",
-    "year2": "year2",
-    "summary2": "summary2",
-    "pdf2": "pdf2"
-}
-'''
+    for t in tags:
+        tag += '#'+list_of_keys[list_of_values.index(t)].replace(' ','_')+' '
+
+    tag += '#'+publication
+
+    return tag
 
 def send_summary(fields):
     count = 0
@@ -80,7 +59,7 @@ def send_summary(fields):
 
     with open('./served_papers_list.txt','a') as f:
         for k in list(summary_data.keys()):
-            if count == 3:
+            if count == 10:
                 break
             if fields[0] != '' and fields[0] != 'UNK':
                 if len(set(summary_data[k]['tags']) & set(fields)) == 0:
@@ -90,10 +69,11 @@ def send_summary(fields):
             ccount = str(count)
             paper['title' + ccount] = data['title']
             paper['author' + ccount] = ','.join(data['authors'])
-            paper['publication' + ccount] = data['publication']
+            paper['publication' + ccount] = data['comments']
             paper['year' + ccount] = data['year']
             paper['summary' + ccount] = data['summary']
             paper['pdf' + ccount] = data['pdf']   # pdf URL!
+            paper['tag' + ccount] = generate_tags(data['tags'],data['publication'])
             count += 1
 
     return paper
@@ -121,14 +101,14 @@ def getPaper():
         paper = send_summary(fields)
         
     else:
-        print('here!')
-        for i in range(3):
+        for i in range(10):
             paper['title'+str(i)] = 'please wait'
             paper['author'+str(i)] = ''
             paper['publication'+str(i)] = ''
             paper['year'+str(i)] = ''
             paper['summary'+str(i)] = ''
             paper['pdf'+str(i)] = ''
+            paper['tag'+str(i)] = ''
 
     if interest != 'UNK':
         thread = Thread(target=summarization_caching,args=(fields,))
