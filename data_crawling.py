@@ -68,12 +68,16 @@ def get_top_10_papers(fields):
         authors = [[author.text.strip() for author in a.find_all(name='a')] for a in soup.find_all(attrs={'class':'authors'})]
         comments = soup.find_all(attrs={'class':'has-text-grey-dark mathjax'})
         tags = [t.text.lower().strip().split('\n') for t in soup.find_all(attrs={'class':'tags is-inline-block'})]
-        keywords = [t.text.strip() for t in soup.find_all(attrs={'class':'search-hit mathjax'})]
+        keywords = []
+        
+        for comment in comments:
+            keywords.append(comment.find_all(attrs={'class':'search-hit mathjax'})[0].text.strip())
+        
+        print(len(tags))
+        print(len(keywords))
         print(keywords)
 
         mapper = dict()
-        print(list(pubs.keys()))
-        print(tags[0])
         print([t for t in tags[0] if t in list(pubs.keys())])
 
         for i in range(size):
