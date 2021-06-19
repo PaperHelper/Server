@@ -73,12 +73,7 @@ def get_top_10_papers(fields):
         for comment in comments:
             keywords.append(comment.find_all(attrs={'class':'search-hit mathjax'})[0].text.strip())
         
-        print(len(tags))
-        print(len(keywords))
-        print(keywords)
-
         mapper = dict()
-        print([t for t in tags[0] if t in list(pubs.keys())])
 
         for i in range(size):
             mapper[codes[i]] = {
@@ -141,6 +136,19 @@ def get_files(papers):
             continue
         download(f'https://arxiv.org/pdf/{filename}',f'./data/{filename}')
         print(f'{filename} download completed.')
+
+    with open('./mapper.json','r') as f:
+        mapper = json.load(f) 
+
+    for f in os.listdir('./data/'):
+        if os.path.getsize(f'./data/{f}') == 0:
+            os.remove(f'./data/{f}')
+            print(f'removed {f}.')
+            if f[:-4] in mapper.keys():
+                del mapper[f[:-4]]
+
+    with open('./mapper.json','w') as f:
+        json.dump(mapper,f)
 
 if __name__ == '__main__':
     papers = get_top_10_papers(['cs.ro','cs.cl'])
