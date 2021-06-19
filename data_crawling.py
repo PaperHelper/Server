@@ -9,7 +9,7 @@ import json
 import tqdm
 
 pubs = {
-            'cs.ai': ['nips','ieee','eccv','cvpr','iccv','aaai','icml','iclr','iswc','neurlps'],
+            'cs.ai': ['nips','ieee','eccv','cvpr','iccv','aaai','icml','iclr','iswc','neurips'],
             'cs.db': ['sigir','sigmod','WWW','acm','ieee','icde','wsdm','cikm','icwsm'],
             'cs.os': ['ieee', 'acm', 'asplos', 'usenix', 'fast', 'eurosys', 'osdi', 'sosp', 'jss', 'tecs' ],
             'cs.dc': ['acm','icdcs','hpdc', 'ieee', 'ppopp','ndss', 'tpds', 'jpdc', 'socc', 'dc'],
@@ -18,7 +18,8 @@ pubs = {
             'cs.pl': ['ecoop','esop','acm','sigplan','icfp','iclp','oopsla','popl','pldi'],
             'cs.ds': ['stoc','focs','soda','spaa','wads','esa','swat','acm','ieee','isaac'],
             'cs.cl': ['acl','emnlp','naacl','tacl','SemEval','coling','eacl','conll','lrec','sigdial'],
-            'cs': ['acm','ieee','iclr','nips','icml','acs']
+            'cs.ro': ['ieee','asme','rsj','acm','ijpr','rss','jint','jfr','icra','infocom'],
+            'cs': ['acm','ieee','iclr','nips','icml','acs','nerips','cvpr','iccv','eccv','aaai']
         }
 
 def download(url, file_name):
@@ -68,6 +69,7 @@ def get_top_10_papers(fields):
         comments = soup.find_all(attrs={'class':'has-text-grey-dark mathjax'})
         tags = [t.text.lower().strip().split('\n') for t in soup.find_all(attrs={'class':'tags is-inline-block'})]
         keywords = [t.text.strip() for t in soup.find_all(attrs={'class':'search-hit mathjax'})]
+        print(keywords)
 
         mapper = dict()
         print(list(pubs.keys()))
@@ -131,5 +133,5 @@ def get_files(papers):
         print(f'{p}.pdf download completed.')
 
 if __name__ == '__main__':
-    papers = get_top_10_papers(['cs.cl'])
+    papers = get_top_10_papers(['cs.ro','cs.cl'])
     get_files(papers)
