@@ -35,6 +35,10 @@ def postInterest():
         interest = interest.replace(key, cs[key])
    
     print("Interests:", interest)
+
+    with open('./save_fields.txt','w') as f:
+        f.write(interest)
+
     return jsonify(interest)
 
 def generate_tags(tags, publication):
@@ -93,6 +97,9 @@ def summarization_caching(fields):
 @app.route('/paper', methods=['GET'])
 def getPaper():
     paper = {}
+
+    if os.path.exists('./save_fields.txt') and interest == 'UNK':
+        interest = open('./save_fields.txt','r').read()
 
     fields = interest.strip().split('\t')
     print(fields)
