@@ -72,13 +72,19 @@ def preprocess_text(filename):
     print("References not in paper or there was Acknowledgements section!")
   # print(text)
   text = re.sub(chr(64256),'ff',text)
-  text = re.sub('\(.+\)','',text)
+  text = re.sub('\([\w\W]+?\)','',text)
   text = re.sub('\[[^a-zA-Z]+\]','',text)
   text = re.sub('-\n','',text)
-  text = re.sub('\n',' ',text)
-  text = re.sub('\d+\.\s','',text)
-  paragraphs = re.split('\s{3,}',text)
-  for p in paragraphs:
+  text = text.replace('\n','\t')
+  text = re.sub('\t{3,}','\n\n\n',text)
+  text = re.sub('\t{2}','\n\n',text)
+  text = text.replace('.\t','.\n') 
+  text = text.replace('al.\n','al. ')
+  text = text.replace('\t',' ')
+  paragraphs = re.split('\n{2,}',text)
+  paragraphs = [p.replace('\n',' ') for p in tqdm(paragraphs) if re.search('[a-z]+',p,re.I)]
+  for i,p in enumerate(paragraphs):
+    print(i,'th paragraph')
     print(p+'\n')
   new_paragraphs = [p for p in tqdm(paragraphs) if re.search('[a-z]+',p,re.I)]
 
@@ -134,9 +140,15 @@ def generate_chunks(new_paragraphs,tokenizer):
 def generate_summarization(modified_paragraphs,summarizer):
   summarization = []
 
+  f = open('text-summary.txt','w')
+
   for paragraph in tqdm(modified_paragraphs):
       summarized = summarizer(paragraph)
       summarization.append(summarized[0]['summary_text'])
+      f.write('text:\n')
+      f.write(paragraph+'\n\n')
+      f.write('summary:\n')
+      f.write(summarized[0]['summary_text']+'\n\n\n\n')
 
   return summarization
 
@@ -188,7 +200,97 @@ def main(papers):
     json.dump(summary_data,f)
 
 if __name__ == '__main__':
-    
+  """
   files = [f[:-4] for f in os.listdir('./data/') if f.endswith('.pdf')]
     
   main(files[:1]) 
+  """
+  summarizer = pipeline(task="summarization", model="facebook/bart-large-cnn")
+  tokenizer = BartTokenizer.from_pretrained("facebook/bart-large-cnn")
+  paragraph="""Since a majority of the mature stock markets, like those in the U.S.A,
+Korea, U.K., and France, are weak-form efficient markets [3], many studies have been conducted on predicting stock prices using financial
+news. To quantitatively measure market states, various measurement
+methods have been applied. One method, the Hurst Exponent, is a
+concept used in econophysics to measure market states [3]. The Hurst
+Exponent measures long-term memory quantitatively [4]. If the Hurst
+Exponent is < 0.5, stock prices can be interpreted as mean-reverting. If
+it equals 0.5, it means that stock prices follow a random walk, and if it
+is > 0.5, stock prices can be interpreted as following a trend. In other
+words, the larger the Hurst Exponent, the greater the effect of past
+prices on current prices. If the Hurst Exponent is high, the stock market
+is not a weak-form efficient market because it can be predicted with
+historical prices. According to Eom et al. [3], the Korean stock market
+has a Hurst Exponent of approximately 0.5 so that the Korean stock
+market is the weak-form efficient market. Therefore, when predicting
+stock prices in the Korean market, it is meaningful to use public information
+for analysis, such as financial news, rather than historical
+prices.
+In research on stock price forecasting through financial news, it is
+common to build a keyword dictionary for each company. This dictionary
+provides keywords that influence the fluctuations of stocks of
+individual companies, and they should be used to predict future stock
+prices. Recently, studies on identifying relevant firms [5], and studies
+on reflecting the effects of relevant firms based on the Global Industry
+Classification Standard (GICS) sector [6,7] emerge. Especially, Shynkevich
+et al. [7] constructed an individual firm dictionary, sub-industry
+dictionary, industry dictionary, group industry dictionary, and sector
+dictionary in the S & P 500 healthcare sector and predicted stock
+movements with the combination of them. The results of this study are
+as follows: The prediction accuracy of integrating them is higher than
+that of news of individual firms only. In other words, the dictionaries
+that include higher-level concepts, e.g. sector dictionaries, reflect information
+that affects industry characteristics or industries that are not
+covered by the concepts of the subordinate individual firms.
+Although research has progressed gradually on the basis of the influence
+within the GICS sector, it has been conducted based on the
+assumption that every firm influences other firms, and the influence
+between firms is bidirectional. However, companies in the same GICS
+sector may not influence each other, and there is a structure in which a
+company affects other companies but not inversely [8]. In this study,
+we overcome the limitations of the existing research by applying the
+transfer entropy technique, which has been actively studied in the
+complex system theory. We find the causal relationships of the firms
+within the GICS sectors and predict the stock price based on causal
+relationships. Especially, we integrate the effect of the target firm and
+the effects of the causal firms by employing Multiple Kernel Learning
+method [9]."""
+  p2 = """The results show that our approach improves the prediction performance
+in comparison with approaches that are based on news on
+target firms [10] and on the GICS Sector-based integration approach
+[7], which are two state-of-the-art algorithms. Furthermore, the experimental
+results show that the proposed method can predict the stock
+price directional movements even when there is no financial news on
+the target firm, but financial news is published on causal firms. In addition,
+we find that the results change by setting the statistical significance
+of transfer entropy. Therefore, it is important to set the
+threshold of statistical significance through a grid search.
+In this study, we make three main contributions: First, in solving
+socioeconomic problems, we were able to achieve higher performance
+by successfully combining physics theory with machine learning. To the
+best of our knowledge, this paper is the first paper to combine complex
+system methodology with machine learning. Second, previous studies
+have predicted stock prices at the individual level and searched for
+relevant companies to consider their impact. This study is the first to
+predict stock prices while considering the causality between the companies.
+Finally, existing studies were able to predict stock movements only when the news on the company was released. In this paper, we
+propose a method for predicting stock movements with a causal relationship
+through causality detection, even when no news is published
+directly.
+We organize the remainder of this paper as follows: Section 2 provides
+an overview of the relevant literature on complex networks and
+text mining. Section 3 describes news and stock datasets, transfer entropy
+analysis, text pre-processing techniques, machine learning approaches
+and evaluation metrics. Section 4 describes the experimental
+results. Section 5 presents the study's conclusions and outlines directions
+for future work."""
+  summarized = summarizer(paragraph)
+  print('text:\n')
+  print(paragraph+'\n\n')
+  print('summary:\n')
+  print(summarized[0]['summary_text']+'\n\n\n\n')
+
+  summarized = summarizer(p2)
+  print('text:\n')
+  print(paragraph+'\n\n')
+  print('summary:\n')
+  print(summarized[0]['summary_text']+'\n\n\n\n')
